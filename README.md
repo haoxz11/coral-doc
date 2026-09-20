@@ -2,6 +2,8 @@
 
 一个 Agent skill：按 coral 文档库的约定撰写 Markdown 并落盘到本地文档库。
 
+仓库地址：<https://github.com/haoxz11/coral-doc> ｜ 安装方式见下方[「安装」](#安装)
+
 它替使用者解决三件事：
 
 - **位置选对**——从文档库现有结构里选一级菜单与目标目录，而不是随便丢一个路径。
@@ -37,30 +39,21 @@
 
 ## 安装
 
-把本目录复制到 Agent 的 skills 目录。**本机当前生效位置是 `~/.zcode/skills/coral-doc/`**（会话实际加载的就是这一份）：
+本技能发布在 GitHub：<https://github.com/haoxz11/coral-doc>
+
+装到**跨 agent 的通用 skill 目录** `~/.agents/skills/`，多个 agent 共用同一份：
 
 ```bash
-rsync -a --delete --delete-excluded \
-  --exclude '.git' --exclude '.gitignore' --exclude '.zcode' \
-  /Users/zhujy/coral-doc/ ~/.zcode/skills/coral-doc/
+git clone https://github.com/haoxz11/coral-doc.git ~/.agents/skills/coral-doc
 ```
 
-`~/.agents/skills/coral-doc/` 也是一个合法的 skill 发现根，可以作为安装目标：
+更新到最新版：
 
 ```bash
-rsync -a --delete --delete-excluded \
-  --exclude '.git' --exclude '.gitignore' --exclude '.zcode' \
-  /Users/zhujy/coral-doc/ ~/.agents/skills/coral-doc/
+git -C ~/.agents/skills/coral-doc pull --ff-only
 ```
 
-但**不要两处同时留**。发现顺序是 `~/.zcode/skills` 先于 `~/.agents/skills`，同名的两份只有先命中的那份会加载，另一份被遮蔽（改了也不生效）。若确定要迁到 `~/.agents/skills/`，先删掉 `~/.zcode/skills/coral-doc/` 再装。
-
-安装后自查四项：
-
-1. 对应目录下的 `SKILL.md` 存在，且首行是合法的 YAML front matter（`name` + `description` + `when_to_use`）。
-2. `references/` 下的两个文件都在。
-3. 目标文档库目录存在。
-4. 若两处都装了，按上面的发现顺序确认最终生效的是哪一份。
+仓库里只有 `SKILL.md`、`references/` 和这份 README，没有依赖、无需构建。技能本身遵循通用的 `SKILL.md` + YAML front matter 约定，不绑定任何具体 agent——装到哪个目录由你的 agent 读哪个目录决定。
 
 ## 使用示例
 
@@ -197,29 +190,27 @@ coral-doc/
 
 ## 维护指南
 
-**源码与安装是两份拷贝。** 源码在本目录，安装位置是 `~/.zcode/skills/coral-doc/`（复制而非软链）。改完源码需重新同步，否则 ZCode 加载的仍是旧版本：
-
-```bash
-rsync -a --delete --delete-excluded \
-  --exclude '.git' --exclude '.gitignore' --exclude '.zcode' \
-  /Users/zhujy/coral-doc/ ~/.zcode/skills/coral-doc/
-```
-
-仓库元数据（`.git` / `.gitignore` / `.zcode`）不要带进安装目录：安装目录只需要 `SKILL.md`、`references/` 和这份 README，混入 `.git` 会让它变成一个没有 remote 的游离工作副本。`--exclude` 负责不发送，`--delete-excluded` 负责把目标端已残留的同类文件删掉（只加 `--exclude` 时，目标端已存在的排除项不会被删除）。
+**仓库是唯一源头。** 内容以 GitHub 上的 `master` 为准，安装目录是它的克隆，升级走 `git pull`（见「安装」一节）。改动流程是：改 → 提交 → 推送 → 使用方 `git pull`。只改本地工作副本而不推送，已安装的那份不会跟着变。
 
 **改动时的联动关系**
 
 - `SKILL.md` front matter 的 `name` / `description` / `when_to_use` 共同决定**是否被自动唤起**。当前三者写的是「仅手动调用」，改动它们会直接改变唤起行为，改后需同步本文档的「调用方式：仅手动唤起」一节。
-
-**改完必须重新同步**（源码改动不会自动生效到已安装副本），命令见「安装」一节。只改 `.agents` 或只改 `.zcode` 中的一份、而另一份仍在，会出现「改了没反应」——因为先命中的那份在生效。
 - 新增或修改 coral 渲染能力，改 `references/coral-markdown.md`，并同步本文档的「coral markdown 能力速查」表与 `SKILL.md` 的美化清单。
 - 导入流程的命令或上传接口有变化，改 `references/dingtalk-import.md`；摘要格式变化需同步 `SKILL.md` 的对应步骤。
-- 保持约束：只使用 `references/coral-markdown.md` 列出的能力；不绑定特定团队清单或固定路径。
+- 保持约束：只使用 `references/coral-markdown.md` 列出的能力；不绑定特定团队清单或固定路径，也不绑定某个具体 agent。
+
+**本地开发时若不想推送到远端再拉**，可以直接把工作副本同步到安装位置，省一次提交：
+
+```bash
+rsync -a --delete --delete-excluded --exclude '.git' --exclude '.gitignore' \
+  ~/coral-doc/ ~/.agents/skills/coral-doc/
+```
+
+两个注意点：这条命令产出的是 `.git` 被删掉的「纯文件」副本，**只能用于非克隆安装**——对克隆的那份执行会删掉它的 `.git`，`git pull` 从此失效；另外 `--exclude` 只负责不发送，目标端已残留的同类文件要配 `--delete-excluded` 才会被一并清掉。
 
 ## 已知限制
 
 - 钉钉仅支持普通文档（adoc）导入，表格/画板/白板/多维表需先在钉钉中转为文档。
-- `<Badge>` 等 Hugo 主题 shortcode coral 不渲染（除非样板文档本身在用）。
 - 行内数学公式默认关闭，需服务端开启 `[render].inline_math`。
 - skill 只负责生成并落盘文档，不做落盘后的站点渲染或链接可用性校验。
 - 钉钉返回的图片是短时效签名 URL，不走上传换链会很快失效。
