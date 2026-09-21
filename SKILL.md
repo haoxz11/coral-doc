@@ -21,6 +21,19 @@ when_to_use: 仅当用户消息中显式出现 coral-doc 或 /coral-doc 指名�
 - **导入模式**：用户给出钉钉文档链接/ID 并表达存库意图（"导入到文档库"、"转存到 coral"等）时进入本模式，见"钉钉文档导入"。
 - **本地优化模式**：用户声明要优化一个本地 md 文件（"优化这个 md"、"帮我优化文档"等）时进入本模式，默认处理本地图片换链并整理 front matter 头信息，见"本地 Markdown 优化"。
 
+## 第零步：环境检查（必须）
+
+被调用后，在进入任何模式之前，先执行 `coral skill ensure` 检查运行环境：
+
+1. **coral 未安装**（`coral -v` 报 command not found）：按系统安装 coral 后重试：
+   - macOS 且有 Homebrew：`brew install haoxz11/coral/coral`
+   - 无 Homebrew / Linux：`curl -fsSL https://github.com/haoxz11/coral/releases/latest/download/coral-installer.sh | sh`
+2. **coral 版本过旧**（`coral skill ensure` 报未知子命令）：按上面同样的渠道升级 coral（macOS：`brew upgrade haoxz11/coral/coral`），重试。
+3. **`coral skill ensure` 非零退出**（如本地 skill 目录有未提交修改、dev 构建未捆绑 skill）：把命令输出**原样转告用户**并停止，不要自行改动 `~/.agents/skills/coral-doc/`。
+4. **退出码 0**：按输出确认 skill 版本状态（`installed:` / `upgraded:` / `up-to-date:`），继续后续步骤。
+
+Windows 不在支持范围内，遇到时明确告知用户。
+
 ## 第一步：确定文档库地址（必须）
 
 **文档库地址由使用者在指令中告知**（coral 的内容根目录，即 `[content].root` 指向的目录）。

@@ -41,7 +41,19 @@
 
 本技能发布在 GitHub：<https://github.com/haoxz11/coral-doc>
 
-装到**跨 agent 的通用 skill 目录** `~/.agents/skills/`，多个 agent 共用同一份：
+装到**跨 agent 的通用 skill 目录** `~/.agents/skills/`，多个 agent 共用同一份。
+
+### 方式一：coral 托管（推荐）
+
+已安装 coral 的环境，直接让 coral 安装并自动升级：
+
+```bash
+coral skill install
+```
+
+之后每次使用技能时自动检查并升级到 coral 内置的最新版本（`coral skill ensure`）；本地版本比内置新时保留本地版本，不会降级。
+
+### 方式二：git clone（备选）
 
 ```bash
 git clone https://github.com/haoxz11/coral-doc.git ~/.agents/skills/coral-doc
@@ -53,7 +65,9 @@ git clone https://github.com/haoxz11/coral-doc.git ~/.agents/skills/coral-doc
 git -C ~/.agents/skills/coral-doc pull --ff-only
 ```
 
-仓库里只有 `SKILL.md`、`references/`、`scripts/` 和这份 README，没有依赖、无需构建（缓存脚本只依赖 python3 标准库）。技能本身遵循通用的 `SKILL.md` + YAML front matter 约定，不绑定任何具体 agent——装到哪个目录由你的 agent 读哪个目录决定。
+注意：此方式安装的副本在工作区干净时会被 coral 升级覆盖为内置版本；想保留本地定制，请不要混用两种方式。
+
+仓库里只有 `SKILL.md`、`references/`、`scripts/`、`VERSION` 和这份 README，没有依赖、无需构建（缓存脚本只依赖 python3 标准库）。技能本身遵循通用的 `SKILL.md` + YAML front matter 约定，不绑定任何具体 agent——装到哪个目录由你的 agent 读哪个目录决定。
 
 ## 使用示例
 
