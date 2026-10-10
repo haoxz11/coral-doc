@@ -115,11 +115,13 @@ python3 <skill目录>/scripts/imports_cache.py <子命令>
 
 按顺序尝试：
 
-1. **已安装**：当前会话的 MCP 工具中已有 coral 的上传工具（工具描述带 `【coral-mcp】` 前缀，工具名 `upload_file` / `finalize_upload`）——直接使用。
-2. **未安装**：读文档库**首页** front matter（根目录分支页回退链 `_index.md` > `index.md` > `readme.md`）中的 `remote_url` 字段——它指向该库对应的 coral 服务实例，MCP 端点为 `{remote_url}/mcp`（JSON-RPC 2.0，POST，`tools/call` 方法）。调用需要鉴权时若拿不到 token，向用户询问。该 `remote_url` 归一化后同时用作缓存里 `uploads` 的分组键。
+1. **已安装**：当前会话的 MCP 工具中已有 coral 的工具——识别标识是**工具描述统一带的 `【coral-mcp】` 前缀**。工具集按实例配置组装，缺哪个都不影响其余：上传 `upload_file` / `finalize_upload`（`[upload]` 开启时）；只读 `search` / `read_page` / `list_tree`（随端点默认可用，`search` 另依赖 `[search]`）；`login`（`[auth]` 开启时）。
+2. **未安装**：读文档库**首页** front matter（根目录分支页回退链 `_index.md` > `index.md` > `readme.md`）中的 `remote_url` 字段——它指向该库对应的 coral 服务实例，MCP 端点为 `{remote_url}/mcp`（JSON-RPC 2.0，POST，`tools/call` 方法）。需要登录态时走 4.6 的 `login` 流程自取，不要向用户索要 token。该 `remote_url` 归一化后同时用作缓存里 `uploads` 的分组键。
 3. 首页没有 `remote_url` 字段、且 coral-mcp 未安装：向用户询问 coral 服务地址（或让用户安装 coral-mcp），不要猜测。
 
 ### 4.2 上传换链接
+
+> 实例开启上传登录锁（`[upload].require_auth` 且 `[auth]` 开启）时，第一步就会收到 401 语义的工具级 `isError`——先按 4.6 拿到会话令牌，后续请求带 `Authorization: Bearer` 头再重试。
 
 对每张图片：
 
@@ -162,6 +164,17 @@ python3 <skill目录>/scripts/imports_cache.py <子命令>
    - 内容不一致、或新文档中配对不上的新增图片 → 走 4.2 上传换新链接。
    - 旧有新无 → 该引用随正文删除（coral 侧已上传的文件**不删**）。
 5. **无法比对时**（旧链接拉取失败、哈希拿不到等）：**默认视为未变更、沿用旧链接**，并在转换摘要中标注"X 张未能比对、默认沿用"；用户明确要求强制刷新时才全部重传。
+
+### 4.6 需要登录态时：login 工具
+
+实例开启 `[upload].require_auth`（且 `[auth]` 已开启）时，未登录调 `upload_file` / `finalize_upload` 得到的是**工具级 `isError`**——文案含 401 语义与 login 指引，不是 HTTP 401，工具也仍在工具表里。此时不要重试上传、不要向用户索要 token，按下面的设备流自取登录态：
+
+1. **发起**：调用 `login` 工具（**不带参数**），返回 `{path, request_id}`。`path` 是相对路径（`/mcp/login?request_id=...`），与访问 `/mcp` 用的 base 地址拼成完整链接。
+2. **交给用户登录**：把完整链接给用户，让其在浏览器打开完成站点登录（LDAP）。挂起登录 **5 分钟内有效**，超时作废；`request_id` 是一次性凭据，不要写进落盘文档或汇报正文。
+3. **轮询领取**：携带同一 `request_id` 再次调用 `login`——返回 `{status: "pending"}` 就稍候再轮；返回 `{status: "ok", token, user}` 时取 `token`；返回 isError 且文案说明"已过期"时，回到第 1 步重新发起。
+4. **使用令牌**：之后对该实例的所有 MCP 请求头都带 `Authorization: Bearer <token>`（上传与只读工具同一通道）。令牌有效期与站点会话一致（`[auth].session_ttl_days`），固定不自动续期；请求被 401 拒绝时重新走一遍本流程。
+
+`[auth]` 关闭的实例恒匿名、没有上传锁，本节用不上；`login` 工具也只在 `[auth]` 开启时出现在工具表。
 
 ## 5. 导不出的内容
 
