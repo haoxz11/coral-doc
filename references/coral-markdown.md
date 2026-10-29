@@ -17,7 +17,8 @@ coral 是 Markdown 文档服务引擎。渲染管线：shortcode 占位 → 数�
 | `url` | string | 仅 home 首页主按钮，markdown 链接语法 `[文案](地址)` |
 | `disableToc` | bool | 关闭页内 TOC |
 | `date` | string | 排序（规范化 `YYYY-MM-DD`）+ 页脚展示 |
-| `remote_url` | string | 仅首页：远程附件地址，文档里的 `/f/...` 链接交给该实例解析；也是导入流程定位 coral 服务的依据 |
+| `remote_url` | string | 仅首页：远程附件地址，文档里的 `/f/...` 链接交给该实例解析；也是导入流程定位 coral 服务、sitemap/RSS 绝对地址的来源 |
+| `description` | string | 页面摘要：首页的值作 llms.txt 站点摘要回落与分享 meta（description + OpenGraph 族）文案 |
 
 普通文档惯例：`title` + `date: YYYY-MM-DD HH:MM:SS`。目录分支页 `_index.md` 惯例：`title` + `icon` + `weight`（+ 可选 `permalink`）。
 
@@ -34,7 +35,15 @@ coral 是 Markdown 文档服务引擎。渲染管线：shortcode 占位 → 数�
 {{% /notice %}}
 ```
 
-`style` 白名单：`tip` / `info` / `note` / `caution` / `warning` / `important` / `danger` / `error`。`title` 可省略。
+`style` 白名单：`tip` / `info` / `note` / `caution` / `warning` / `important` / `danger` / `error`。`title` 可省略。图标经 iconify 运行时加载（`title` 标题行携带），内网无 CDN 时图标空白。
+
+### badge（行内徽标）
+
+```markdown
+状态 {{% badge style="green" title="已上线" %}}v2.1{{% /badge %}}
+```
+
+行内 pill 徽标，与前后文留在同一段渲染，不要求独占一行；进标题时 TOC 回填纯文本。`style` 白名单：`tip` / `info` / `note` / `caution` / `warning` / `important` / `danger` / `error` + 颜色 `blue` / `cyan` / `green` / `grey` / `magenta` / `orange` / `red`，未识别回退 `default`。`title` 可省略；`icon` 可选（Iconify 完整名如 `mdi:check` 或图片 URL，裸名照常输出但不渲染并记 WARN）。
 
 ### tabs（选项卡）
 

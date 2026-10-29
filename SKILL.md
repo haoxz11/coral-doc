@@ -89,6 +89,7 @@ front matter 用 YAML（首行 `---`）。字段语义详见 `references/coral-m
 主动使用 coral 的 markdown 能力美化（语法速查见 `references/coral-markdown.md`）：
 
 - **notice 提示块**：注意事项、风险提示
+- **badge 行内徽标**：状态、版本等短标签（与正文同段）
 - **tabs 选项卡**：多方案对比、多环境说明
 - **mermaid 图**：流程、时序、架构关系
 - **children**：章节目录页列出子页面
@@ -119,7 +120,7 @@ front matter 用 YAML（首行 `---`）。字段语义详见 `references/coral-m
    - **更新 `date`**：更新为当天最新时间（`YYYY-MM-DD HH:MM:SS`）——缺失时补上，已有时也刷新。
    - **`icon` 仅建议，不强制**：目录分支页 `_index.md` 缺 `icon` 时，给出 1-2 个与目录主题匹配的 Iconify 名（带前缀如 `mdi:home`）作为建议，在落盘前确认时一并展示；使用者可采用、换一个或选择不加。
    - `weight` 是特殊字段，默认不补不改——它决定同级排序，取值应由用户决定；`_index.md` 缺 `weight` 时仅在汇报中提示。
-   - 其余字段（`permalink`、`draft`、`archetype`、`url`、`disableToc`、`remote_url`）一律不动。
+   - 其余字段（`permalink`、`draft`、`archetype`、`url`、`disableToc`、`remote_url`、`description`）一律不动。
    - 完全没有 front matter 时新建 YAML 头（首行 `---`）；已有 front matter 为 TOML（`+++`）时保持 TOML 写法。无需任何调整时，在汇报中说明"头信息无需调整"。
 5. **其他优化按用户意图执行**：用户说了优化什么就优化什么（格式修正、链接修复、coral 能力美化等），用户没提到的不要擅自做。若优化目标落在文档库内，遵循 front matter 与站内链接约定（见"约定提醒"与 `references/coral-markdown.md`）。
 6. **落盘前确认**：展示改动摘要（图片 N 张：M 张新上传换链、C 张命中台账未重复上传、K 张库内文件已删除、失败原因；头信息改动清单：修正的字段名、补上/更新的字段、icon 建议值——使用者可选择不加；其他优化项清单），确认后写回原文件并汇报。

@@ -216,7 +216,7 @@ https://alidocs.dingtalk.com/i/nodes/xxxxxxxx
    | 文档库目录**内** | 改写引用，并**删除本地文件**（由 coral 服务统一提供） |
    | 文档库目录**外** | 只改写引用，**本地文件保留** |
 
-3. **整理 front matter（默认执行，无需用户点名）**：重点是**修正字段名错误**——拼写或大小写错误（如 `tile`、`Data`、`Title`）按字段表修正为正确名称，对应不上已知字段的保留不动并在汇报中提示。关键字段缺失时补：`title` 从正文一级标题或文件名（去数字前缀）提炼。`date` 更新为当天最新时间（`YYYY-MM-DD HH:MM:SS`，缺失时补、已有时也刷新）。`_index.md` 缺 `icon` 时给出 1-2 个匹配目录主题的 Iconify 名建议，使用者可采用、换一个或选择不加。`weight` 属特殊字段，默认不补不改（取值应由使用者决定），缺失时仅在汇报中提示。其余字段（`permalink`、`draft`、`archetype`、`url`、`disableToc`、`remote_url`）一律不动；没有 front matter 时新建 YAML 头（首行 `---`），已有 TOML 头（`+++`）保持 TOML；无需调整时汇报说明。
+3. **整理 front matter（默认执行，无需用户点名）**：重点是**修正字段名错误**——拼写或大小写错误（如 `tile`、`Data`、`Title`）按字段表修正为正确名称，对应不上已知字段的保留不动并在汇报中提示。关键字段缺失时补：`title` 从正文一级标题或文件名（去数字前缀）提炼。`date` 更新为当天最新时间（`YYYY-MM-DD HH:MM:SS`，缺失时补、已有时也刷新）。`_index.md` 缺 `icon` 时给出 1-2 个匹配目录主题的 Iconify 名建议，使用者可采用、换一个或选择不加。`weight` 属特殊字段，默认不补不改（取值应由使用者决定），缺失时仅在汇报中提示。其余字段（`permalink`、`draft`、`archetype`、`url`、`disableToc`、`remote_url`、`description`）一律不动；没有 front matter 时新建 YAML 头（首行 `---`），已有 TOML 头（`+++`）保持 TOML；无需调整时汇报说明。
 4. **其他优化按使用者意图执行**：说了优化什么就做什么（格式修正、链接修复、coral 能力美化等），没提到的不会擅自做。目标落在文档库内时，遵循 front matter 与站内链接约定。
 5. **落盘前确认**：展示改动摘要（图片 N 张中新上传 M 张、命中台账未重复上传 C 张、K 张库内文件已删除、失败原因；头信息改动清单：修正的字段名、补上/更新的字段、icon 建议值——使用者可选择不加；其他优化项清单），确认后写回原文件并汇报。上传失败的图片保留原引用并说明。
 
@@ -228,6 +228,7 @@ https://alidocs.dingtalk.com/i/nodes/xxxxxxxx
 |---|---|
 | front matter | 首行 `---` 为 YAML（`+++` 为 TOML），字段全部可选 |
 | 提示块 | `{{% notice style="caution" title="风险提示" %}}...{{% /notice %}}`，`style` 白名单：`tip`/`info`/`note`/`caution`/`warning`/`important`/`danger`/`error` |
+| 行内徽标 | `{{% badge style="green" title="X" icon="mdi:check" %}}正文{{% /badge %}}`，`style` = 8 严重级 + 颜色 `blue`/`cyan`/`green`/`grey`/`magenta`/`orange`/`red`，未识别回退 `default`；与正文同段渲染 |
 | 选项卡 | `{{< tabs >}}` + `{{% tab title="X" %}}...{{% /tab %}}`，首个 tab 默认 active |
 | 子页目录 | `{{% children sort="weight" %}}`，适合章节目录页 |
 | mermaid | 代码围栏，语言标注写 `mermaid`；仅围栏形式有效，没有对应 shortcode |
